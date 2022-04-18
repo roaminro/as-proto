@@ -1,4 +1,5 @@
 import { generateMessage } from "./message";
+import { getProtoFilename } from "../names";
 import { FileDescriptorProto } from "google-protobuf/google/protobuf/descriptor_pb";
 import { FileContext } from "../file-context";
 import { generateEnum } from "./enum";
@@ -11,8 +12,6 @@ export function generateFile(
   const fileName = fileDescriptor.getName();
   assert.ok(fileName);
 
-  const filePackage = fileDescriptor.getPackage();
-
   const types: string[] = [];
   for (const messageDescriptor of fileDescriptor.getMessageTypeList()) {
     types.push(generateMessage(messageDescriptor, fileContext));
@@ -22,19 +21,11 @@ export function generateFile(
   }
 
   let NamespacedTypes = types.join("\n\n");
-  if (filePackage) {
-    const packageParts = filePackage.split(".");
-    fileContext.registerDefinition(packageParts[0]);
-
-    while (packageParts.length > 0) {
-      const packagePart = packageParts.pop()!; // type assertion - see line above
-      NamespacedTypes = `
-        export namespace ${packagePart} {
-          ${NamespacedTypes}
-        }
-      `;
+  NamespacedTypes = `
+    export namespace ${getProtoFilename(fileName)} {
+      ${NamespacedTypes}
     }
-  }
+  `;
 
   return `
     ${fileContext.getImportsCode()}
