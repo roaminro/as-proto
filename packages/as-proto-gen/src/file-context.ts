@@ -1,5 +1,6 @@
 import { FileDescriptorProto } from "google-protobuf/google/protobuf/descriptor_pb";
 import { GeneratorContext } from "./generator-context";
+import * as path from "path";
 
 export class FileContext {
   private readonly generatorContext: GeneratorContext;
@@ -71,6 +72,15 @@ export class FileContext {
   getImportsCode(): string {
     let importLines: string[] = [];
     for (const [importPath, importNames] of this.registeredImports) {
+      let relativeImportPath = importPath === 'as-proto' ? importPath : path.relative(this.fileDescriptor.getName()!, importPath);
+
+      const relativeImportPathSlices = relativeImportPath.split('/')
+      if (relativeImportPathSlices.length > 2) {
+        relativeImportPath = relativeImportPath.replace(/\.\.\//, '')
+      } else if (relativeImportPathSlices.length > 1) {
+        relativeImportPath = relativeImportPath.replace(/\.\.\//, './')
+      }
+
       const importFields: string[] = [];
       for (const [importName, uniqueImportName] of importNames) {
         const isAliased = importName !== uniqueImportName;
@@ -80,7 +90,7 @@ export class FileContext {
       }
       importLines.push(
         `import { ${importFields.join(", ")} } from ${JSON.stringify(
-          importPath
+          relativeImportPath
         )};`
       );
     }
