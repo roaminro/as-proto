@@ -86,9 +86,12 @@ export function generateFieldEncodeInstruction(
         }
       `;
     } else {
+      let defaultValue = getFieldDefaultValue(fieldDescriptor);
       return `
-        writer.uint32(${fieldTag});
-        writer.${fieldTypeInstruction}(message.${fieldName});
+        if (message.${fieldName} !== ${defaultValue}) {
+          writer.uint32(${fieldTag});
+          writer.${fieldTypeInstruction}(message.${fieldName});
+        }
       `;
     }
   }
@@ -380,4 +383,10 @@ function getFieldTag(fieldDescriptor: FieldDescriptorProto): number {
   assert.ok(fieldNumber !== undefined);
 
   return (fieldNumber << 3) | getFieldWireType(fieldDescriptor);
+}
+
+function getFieldDefaultValue(fieldDescriptor: FieldDescriptorProto): string | undefined {
+  if (fieldDescriptor.hasDefaultValue())
+    return fieldDescriptor.getDefaultValue();
+  return undefined;
 }
