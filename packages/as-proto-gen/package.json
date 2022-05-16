@@ -30,6 +30,7 @@
     "ts-poet": "^4.9.0"
   },
   "scripts": {
+    "postinstall": "yarn build",
     "test": "echo 'no tests yet'",
     "build": "rimraf build && tsc",
     "prepublishOnly": "cp ../../README.md ./ && yarn build"
