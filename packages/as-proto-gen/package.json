@@ -1,5 +1,5 @@
 {
-  "name": "@roaminroe/as-proto-gen",
+  "name": "@sgerbino/as-proto-gen",
   "version": "0.4.2",
   "license": "MIT",
   "main": "lib/index.js",
