@@ -304,7 +304,7 @@ export function generateFieldDefaultValue(
       case Type.TYPE_STRING:
         return "''";
       case Type.TYPE_BYTES:
-        return "Uint8Array()";
+        return "new Uint8Array()";
       case Type.TYPE_MESSAGE:
         return "null";
       default:
