@@ -261,7 +261,7 @@ export function generateFieldDefaultComparison(
       case Type.TYPE_STRING:
         return `message.${fieldName} !== ''`;
       case Type.TYPE_BYTES:
-        return `message.${fieldName}.equals(${typeCode}())`;
+        return `message.${fieldName}.length !== 0`;
       case Type.TYPE_MESSAGE:
         return `message.${fieldName} !== null`;
       default:
@@ -304,7 +304,7 @@ export function generateFieldDefaultValue(
       case Type.TYPE_STRING:
         return "''";
       case Type.TYPE_BYTES:
-        return "[]";
+        return "Uint8Array()";
       case Type.TYPE_MESSAGE:
         return "null";
       default:
