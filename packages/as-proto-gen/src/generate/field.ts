@@ -236,9 +236,9 @@ export function generateFieldDefaultComparison(
   let typeCode = generateFieldTypeBasic(fieldDescriptor, scopeContext.getFileContext());
 
   if (isRepeated) {
-    return `message.${fieldName}.length !== 0`;
+    return `message.${fieldName}.length != 0`;
   } else if (defaultValue) {
-    return `message.${fieldName} !== ${defaultValue}`;
+    return `message.${fieldName} != ${defaultValue}`;
   } else {
     switch (fieldDescriptor.getType()) {
       case Type.TYPE_INT32:
@@ -252,18 +252,18 @@ export function generateFieldDefaultComparison(
       case Type.TYPE_SFIXED64:
       case Type.TYPE_UINT64:
       case Type.TYPE_ENUM:
-        return `message.${fieldName} !== 0`;
+        return `message.${fieldName} != 0`;
       case Type.TYPE_FLOAT:
       case Type.TYPE_DOUBLE:
-        return `message.${fieldName} !== 0.0`;
+        return `message.${fieldName} != 0.0`;
       case Type.TYPE_BOOL:
-        return `message.${fieldName} !== false`;
+        return `message.${fieldName} != false`;
       case Type.TYPE_STRING:
-        return `message.${fieldName}.length !== 0`;
+        return `message.${fieldName}.length != 0`;
       case Type.TYPE_BYTES:
-        return `message.${fieldName}.length !== 0`;
+        return `message.${fieldName}.length != 0`;
       case Type.TYPE_MESSAGE:
-        return `message.${fieldName} !== null`;
+        return `message.${fieldName} != null`;
       default:
         throw new Error(
           `Type "${fieldDescriptor.getTypeName()}" is not supported by as-proto-gen`
