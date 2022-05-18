@@ -236,7 +236,7 @@ export function generateFieldDefaultComparison(
   let typeCode = generateFieldTypeBasic(fieldDescriptor, scopeContext.getFileContext());
 
   if (isRepeated) {
-    return `!message.${fieldName}.equals(Array<${typeCode}>())`;
+    return `message.${fieldName}.length !== 0`;
   } else if (defaultValue) {
     return `message.${fieldName} !== ${defaultValue}`;
   } else {
@@ -259,7 +259,7 @@ export function generateFieldDefaultComparison(
       case Type.TYPE_BOOL:
         return `message.${fieldName} !== false`;
       case Type.TYPE_STRING:
-        return `message.${fieldName} !== ''`;
+        return `message.${fieldName}.length !== 0`;
       case Type.TYPE_BYTES:
         return `message.${fieldName}.length !== 0`;
       case Type.TYPE_MESSAGE:
