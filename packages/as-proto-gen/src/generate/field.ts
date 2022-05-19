@@ -259,9 +259,7 @@ export function generateFieldDefaultComparison(
       case Type.TYPE_BOOL:
         return `message.${fieldName} != false`;
       case Type.TYPE_STRING:
-        return `message.${fieldName}.length != 0`;
       case Type.TYPE_BYTES:
-        return `message.${fieldName}.length != 0`;
       case Type.TYPE_MESSAGE:
         return `message.${fieldName} != null`;
       default:
