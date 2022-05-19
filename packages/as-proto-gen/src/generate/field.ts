@@ -302,9 +302,7 @@ export function generateFieldDefaultValue(
       case Type.TYPE_BOOL:
         return "false";
       case Type.TYPE_STRING:
-        return "''";
       case Type.TYPE_BYTES:
-        return "new Uint8Array(0)";
       case Type.TYPE_MESSAGE:
         return "null";
       default:
@@ -381,8 +379,6 @@ export function isManagedFieldType(
     case Type.TYPE_DOUBLE:
     case Type.TYPE_BOOL:
     case Type.TYPE_ENUM:
-    case Type.TYPE_STRING:
-    case Type.TYPE_BYTES:
       return false;
     default:
       return true;
