@@ -86,9 +86,12 @@ export function generateFieldEncodeInstruction(
         }
       `;
     } else {
+      let defaultCmp = generateFieldDefaultComparison(fieldName, fieldDescriptor, scopeContext);
       return `
-        writer.uint32(${fieldTag});
-        writer.${fieldTypeInstruction}(message.${fieldName});
+        if (${defaultCmp}) {
+          writer.uint32(${fieldTag});
+          writer.${fieldTypeInstruction}(message.${fieldName});
+        }
       `;
     }
   }
@@ -221,6 +224,50 @@ export function generateFieldType(
   }
 
   return typeCode;
+}
+
+export function generateFieldDefaultComparison(
+  fieldName: string,
+  fieldDescriptor: FieldDescriptorProto,
+  scopeContext: ScopeContext
+): string {
+  const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
+  const defaultValue = fieldDescriptor.getDefaultValue();
+  let typeCode = generateFieldTypeBasic(fieldDescriptor, scopeContext.getFileContext());
+
+  if (isRepeated) {
+    return `message.${fieldName}.length != 0`;
+  } else if (defaultValue) {
+    return `message.${fieldName} != ${defaultValue}`;
+  } else {
+    switch (fieldDescriptor.getType()) {
+      case Type.TYPE_INT32:
+      case Type.TYPE_SINT32:
+      case Type.TYPE_FIXED32:
+      case Type.TYPE_SFIXED32:
+      case Type.TYPE_UINT32:
+      case Type.TYPE_INT64:
+      case Type.TYPE_SINT64:
+      case Type.TYPE_FIXED64:
+      case Type.TYPE_SFIXED64:
+      case Type.TYPE_UINT64:
+      case Type.TYPE_ENUM:
+        return `message.${fieldName} != 0`;
+      case Type.TYPE_FLOAT:
+      case Type.TYPE_DOUBLE:
+        return `message.${fieldName} != 0.0`;
+      case Type.TYPE_BOOL:
+        return `message.${fieldName} != false`;
+      case Type.TYPE_STRING:
+      case Type.TYPE_BYTES:
+      case Type.TYPE_MESSAGE:
+        return `message.${fieldName} != null`;
+      default:
+        throw new Error(
+          `Type "${fieldDescriptor.getTypeName()}" is not supported by as-proto-gen`
+        );
+    }
+  }
 }
 
 export function generateFieldDefaultValue(
