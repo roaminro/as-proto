@@ -172,15 +172,15 @@ export class FixedSizer extends Writer {
         ? 3
         : value < 0x10000000
         ? 4
-        : value < 0x400000000
+        : value < 0x800000000
         ? 5
-        : value < 0x20000000000
+        : value < 0x40000000000
         ? 6
-        : value < 0x1000000000000
+        : value < 0x2000000000000
         ? 7
-        : value < 0x80000000000000
+        : value < 0x100000000000000
         ? 8
-        : value < 0x4000000000000000
+        : value < 0x8000000000000000
         ? 9
         : 10;
   }
