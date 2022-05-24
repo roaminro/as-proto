@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  workflow_run:
+    workflows: Test
+    branches: master
+    types:
+      - completed
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 17
+
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - run: yarn install
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn release
