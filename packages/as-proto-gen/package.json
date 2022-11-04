@@ -1,10 +1,10 @@
 {
   "name": "@koinos/as-proto-gen",
-  "version": "0.4.3",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "lib/index.js",
-  "author": "Piotr Oleś <piotrek.oles@gmail.com>",
-  "repository": "https://github.com/piotr-oles/as-proto.git",
+  "author": "Koinos Group <contact@koinos.group>",
+  "repository": "https://github.com/koinos/as-proto.git",
   "tags": [
     "assemblyscript",
     "protobuf",
