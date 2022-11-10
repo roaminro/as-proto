@@ -77,16 +77,8 @@ export function generateFieldEncodeInstruction(
           }
         }
       `;
-    } else if (isManagedFieldType(fieldDescriptor)) {
-      return `
-        const ${fieldVariable} = message.${fieldName};
-        if (${fieldVariable} !== null) {
-          writer.uint32(${fieldTag});
-          writer.${fieldTypeInstruction}(${fieldVariable});
-        }
-      `;
     } else {
-      let defaultCmp = generateFieldDefaultComparison(fieldName, fieldDescriptor, scopeContext);
+      let defaultCmp = generateFieldDefaultComparison(fieldName, fieldDescriptor);
       return `
         if (${defaultCmp}) {
           writer.uint32(${fieldTag});
@@ -219,7 +211,7 @@ export function generateFieldType(
 
   if (isRepeated) {
     typeCode = `Array<${typeCode}>`;
-  } else if (isManagedFieldType(fieldDescriptor)) {
+  } else if (isNullableFieldType(fieldDescriptor)) {
     typeCode = `${typeCode} | null`;
   }
 
@@ -229,11 +221,9 @@ export function generateFieldType(
 export function generateFieldDefaultComparison(
   fieldName: string,
   fieldDescriptor: FieldDescriptorProto,
-  scopeContext: ScopeContext
 ): string {
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const defaultValue = fieldDescriptor.getDefaultValue();
-  let typeCode = generateFieldTypeBasic(fieldDescriptor, scopeContext.getFileContext());
 
   if (isRepeated) {
     return `message.${fieldName}.length != 0`;
@@ -260,6 +250,7 @@ export function generateFieldDefaultComparison(
         return `message.${fieldName} != false`;
       case Type.TYPE_STRING:
       case Type.TYPE_BYTES:
+        return `message.${fieldName}.length != 0`;
       case Type.TYPE_MESSAGE:
         return `message.${fieldName} != null`;
       default:
@@ -300,7 +291,9 @@ export function generateFieldDefaultValue(
       case Type.TYPE_BOOL:
         return "false";
       case Type.TYPE_STRING:
+        return '""';
       case Type.TYPE_BYTES:
+        return "new Uint8Array(0)";
       case Type.TYPE_MESSAGE:
         return "null";
       default:
@@ -356,31 +349,26 @@ export function generateFieldTypeInstruction(
   }
 }
 
+export function isNullableFieldType(
+  fieldDescriptor: FieldDescriptorProto
+): boolean {
+  const fieldType = fieldDescriptor.getType();
+  assert.ok(fieldType !== undefined);
+
+  return fieldType === Type.TYPE_MESSAGE;
+}
+
 export function isManagedFieldType(
   fieldDescriptor: FieldDescriptorProto
 ): boolean {
   const fieldType = fieldDescriptor.getType();
   assert.ok(fieldType !== undefined);
 
-  switch (fieldType) {
-    case Type.TYPE_INT32:
-    case Type.TYPE_SINT32:
-    case Type.TYPE_FIXED32:
-    case Type.TYPE_SFIXED32:
-    case Type.TYPE_UINT32:
-    case Type.TYPE_INT64:
-    case Type.TYPE_SINT64:
-    case Type.TYPE_FIXED64:
-    case Type.TYPE_SFIXED64:
-    case Type.TYPE_UINT64:
-    case Type.TYPE_FLOAT:
-    case Type.TYPE_DOUBLE:
-    case Type.TYPE_BOOL:
-    case Type.TYPE_ENUM:
-      return false;
-    default:
-      return true;
-  }
+  return (
+    fieldType === Type.TYPE_MESSAGE ||
+    fieldType === Type.TYPE_STRING ||
+    fieldType === Type.TYPE_BYTES
+  );
 }
 
 export function getFieldWireType(
