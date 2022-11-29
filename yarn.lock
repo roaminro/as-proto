@@ -243,7 +243,7 @@
 
 "@koinos/as-proto-gen@file:/Users/mdv/git/as-proto/packages/as-proto-gen":
   "resolved" "file:packages/as-proto-gen"
-  "version" "1.0.3-0"
+  "version" "1.0.3-1"
   dependencies:
     "@types/node" "^17.0.34"
     "google-protobuf" "^3.19.2"
