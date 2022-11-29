@@ -116,19 +116,19 @@ function generateOneOfFieldDecodeInstruction(
     const Message = generateRef(fieldDescriptor, fileContext);
     decodeInstruction = `
         case: ${fieldNumber}:
-          message.${fieldName} = ${Message}.decode(reader, reader.uint32());
-      `;
+          message.${fieldName} = ${Message}.decode(reader, reader.uint32());`;
   } else {
     decodeInstruction = `
         case: ${fieldNumber}:
-          message.${fieldName} = reader.${fieldTypeInstruction}();
-      `;
+          message.${fieldName} = reader.${fieldTypeInstruction}();`;
   }
 
   decodeInstruction += messageDescriptor.getFieldList().map(
     (otherFieldDesc)=>{
-      if (otherFieldDesc.hasOneofIndex() && otherFieldDesc.getOneofIndex() == fieldDescriptor.getOneofIndex()) {
-        const otherFieldName = generateFieldName(fieldDescriptor);
+      if (otherFieldDesc.hasOneofIndex()
+        && otherFieldDesc.getOneofIndex() == fieldDescriptor.getOneofIndex()
+        && otherFieldDesc.getNumber() != fieldNumber) {
+        const otherFieldName = generateFieldName(otherFieldDesc);
         return `
           message.${otherFieldName} = null;`;
     }}).join("");

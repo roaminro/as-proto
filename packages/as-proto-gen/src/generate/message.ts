@@ -39,12 +39,12 @@ export function generateMessage(
 
   const MessageClass = `
     ${canMessageByUnmanaged(messageDescriptor, fileContext) ? "@unmanaged" : ""}
-    export class ${Message} {
+    export class ${Message} {      
       ${generateEncodeMethod(messageDescriptor, fileContext)}
       ${generateDecodeMethod(messageDescriptor, fileContext)}
-
+      
       ${generateMessageFieldsDeclarations(messageDescriptor, fileContext)}
-
+      
       ${generateMessageConstructor(messageDescriptor, fileContext)}
     }
   `;
@@ -124,7 +124,7 @@ function generateDecodeMethod(
     static decode(reader: ${Reader}, length: i32): ${Message} {
       const end: usize = length < 0 ? reader.end : reader.ptr + length;
       const message = new ${Message}();
-
+      
       while (reader.ptr < end) {
         const tag = reader.uint32();
         switch (tag >>> 3) {
@@ -139,13 +139,13 @@ function generateDecodeMethod(
                 )}`
             )
             .join("\n")}
-
+          
           default:
             reader.skipType(tag & 7);
             break;
         }
       }
-
+              
       return message;
     }
   `;
