@@ -138,7 +138,7 @@ function generateOneOfFieldDecodeInstruction(
   if (isMessage) {
     const Message = generateRef(fieldDescriptor, fileContext);
     return `
-        case: ${fieldNumber}:
+        case ${fieldNumber}:
           message.${fieldName} = ${Message}.decode(reader, reader.uint32());
           ${nullOtherOneOfFields(
             messageDescriptor,
@@ -148,7 +148,7 @@ function generateOneOfFieldDecodeInstruction(
     `;
   } else {
     return `
-        case: ${fieldNumber}:
+        case ${fieldNumber}:
           message.${fieldName} = reader.${fieldTypeInstruction}();
           ${nullOtherOneOfFields(
             messageDescriptor,
