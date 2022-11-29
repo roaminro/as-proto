@@ -15,6 +15,7 @@ export function generateFieldEncodeInstruction(
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
   const isPacked = fieldDescriptor.getOptions()?.hasPacked();
+  const isOneOf = fieldDescriptor.hasOneofIndex();
 
   const fieldTag = getFieldTag(fieldDescriptor);
   const fieldName = generateFieldName(fieldDescriptor);
@@ -75,6 +76,13 @@ export function generateFieldEncodeInstruction(
             writer.uint32(${fieldTag});
             writer.${fieldTypeInstruction}(${fieldVariable}[i]);
           }
+        }
+      `;
+    } else if (isOneOf) {
+      return `
+        if (message.${fieldName} !== null) {
+          writer.uint32(${fieldTag});
+          writer.${fieldTypeInstruction}(message.${fieldName});
         }
       `;
     } else {
@@ -355,7 +363,7 @@ export function isNullableFieldType(
   const fieldType = fieldDescriptor.getType();
   assert.ok(fieldType !== undefined);
 
-  return fieldType === Type.TYPE_MESSAGE;
+  return fieldType === Type.TYPE_MESSAGE || fieldDescriptor.hasOneofIndex();
 }
 
 export function isManagedFieldType(
