@@ -97,6 +97,20 @@ export function generateFieldEncodeInstruction(
   }
 }
 
+function maybeNullOneOfField(
+  fieldDescriptor: FieldDescriptorProto,
+  otherFieldDescriptor: FieldDescriptorProto
+): string | undefined {
+  if (otherFieldDescriptor.hasOneofIndex()
+    && otherFieldDescriptor.getOneofIndex() == fieldDescriptor.getOneofIndex()
+    && otherFieldDescriptor.getNumber() != fieldDescriptor.getNumber()) {
+      const otherFieldName = generateFieldName(otherFieldDescriptor);
+      return `
+          message.${otherFieldName} = null
+      `;
+  }
+}
+
 function generateOneOfFieldDecodeInstruction(
   messageDescriptor: DescriptorProto,
   fieldDescriptor: FieldDescriptorProto,
@@ -110,19 +124,41 @@ function generateOneOfFieldDecodeInstruction(
   const fieldName = generateFieldName(fieldDescriptor);
   const fieldTypeInstruction = generateFieldTypeInstruction(fieldDescriptor);
 
-  let decodeInstruction = ""
-
   if (isMessage) {
     const Message = generateRef(fieldDescriptor, fileContext);
-    decodeInstruction = `
+    return `
         case: ${fieldNumber}:
-          message.${fieldName} = ${Message}.decode(reader, reader.uint32());`;
+          message.${fieldName} = ${Message}.decode(reader, reader.uint32());
+          ${messageDescriptor
+            .getFieldList()
+            .map(
+              (otherFieldDescriptor) =>
+                `${maybeNullOneOfField(
+                  fieldDescriptor,
+                  otherFieldDescriptor
+                )}`
+            )
+            .join("\n")}
+          break;
+    `;
   } else {
-    decodeInstruction = `
+    return `
         case: ${fieldNumber}:
-          message.${fieldName} = reader.${fieldTypeInstruction}();`;
+          message.${fieldName} = reader.${fieldTypeInstruction}();
+          ${messageDescriptor
+            .getFieldList()
+            .map(
+              (otherFieldDescriptor) =>
+                `${maybeNullOneOfField(
+                  fieldDescriptor,
+                  otherFieldDescriptor
+                )}`
+            )
+            .join("\n")}
+          break;
+    `;
   }
-
+/*
   decodeInstruction += messageDescriptor.getFieldList().map(
     (otherFieldDesc)=>{
       if (otherFieldDesc.hasOneofIndex()
@@ -132,11 +168,7 @@ function generateOneOfFieldDecodeInstruction(
         return `
           message.${otherFieldName} = null;`;
     }}).join("");
-
-  decodeInstruction += `
-          break;`;
-
-  return decodeInstruction;
+*/
 }
 
 export function generateFieldDecodeInstruction(
@@ -150,13 +182,13 @@ export function generateFieldDecodeInstruction(
   const isPacked = fieldDescriptor.getOptions()?.hasPacked();
   const isOneOf = fieldDescriptor.hasOneofIndex();
 
-//  if (isOneOf) {
-//    return generateOneOfFieldDecodeInstruction(
-//      messageDescriptor,
-//      fieldDescriptor,
-//      scopeContext
-//    )
-//  }
+  if (isOneOf) {
+    return generateOneOfFieldDecodeInstruction(
+      messageDescriptor,
+      fieldDescriptor,
+      scopeContext
+    )
+  }
 
   const fieldNumber = fieldDescriptor.getNumber();
   assert.ok(fieldNumber !== undefined);
