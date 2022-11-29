@@ -97,18 +97,29 @@ export function generateFieldEncodeInstruction(
   }
 }
 
-function maybeNullOneOfField(
-  fieldDescriptor: FieldDescriptorProto,
-  otherFieldDescriptor: FieldDescriptorProto
-): string | undefined {
-  if (otherFieldDescriptor.hasOneofIndex()
-    && otherFieldDescriptor.getOneofIndex() == fieldDescriptor.getOneofIndex()
-    && otherFieldDescriptor.getNumber() != fieldDescriptor.getNumber()) {
-      const otherFieldName = generateFieldName(otherFieldDescriptor);
-      return `
-          message.${otherFieldName} = null
-      `;
-  }
+function nullOtherOneOfFields(
+  messageDescriptor: DescriptorProto,
+  fieldDescriptor: FieldDescriptorProto
+) : string {
+  return `
+          ${messageDescriptor
+            .getFieldList()
+            .filter(
+              (otherFieldDescriptor) => 
+                otherFieldDescriptor.hasOneofIndex()
+                && otherFieldDescriptor.getOneofIndex() == fieldDescriptor.getOneofIndex()
+                && otherFieldDescriptor.getNumber() != fieldDescriptor.getNumber()
+            )
+            .map(
+              (otherFieldDescriptor) =>
+              {
+                const otherFieldName = generateFieldName(otherFieldDescriptor);
+                return `
+                  message.${otherFieldName} = null;`
+              }
+            )
+            .join("\n")}
+  `;
 }
 
 function generateOneOfFieldDecodeInstruction(
@@ -129,46 +140,23 @@ function generateOneOfFieldDecodeInstruction(
     return `
         case: ${fieldNumber}:
           message.${fieldName} = ${Message}.decode(reader, reader.uint32());
-          ${messageDescriptor
-            .getFieldList()
-            .map(
-              (otherFieldDescriptor) =>
-                `${maybeNullOneOfField(
-                  fieldDescriptor,
-                  otherFieldDescriptor
-                )}`
-            )
-            .join("\n")}
+          ${nullOtherOneOfFields(
+            messageDescriptor,
+            fieldDescriptor
+          )}
           break;
     `;
   } else {
     return `
         case: ${fieldNumber}:
           message.${fieldName} = reader.${fieldTypeInstruction}();
-          ${messageDescriptor
-            .getFieldList()
-            .map(
-              (otherFieldDescriptor) =>
-                `${maybeNullOneOfField(
-                  fieldDescriptor,
-                  otherFieldDescriptor
-                )}`
-            )
-            .join("\n")}
+          ${nullOtherOneOfFields(
+            messageDescriptor,
+            fieldDescriptor
+          )}
           break;
     `;
   }
-/*
-  decodeInstruction += messageDescriptor.getFieldList().map(
-    (otherFieldDesc)=>{
-      if (otherFieldDesc.hasOneofIndex()
-        && otherFieldDesc.getOneofIndex() == fieldDescriptor.getOneofIndex()
-        && otherFieldDesc.getNumber() != fieldNumber) {
-        const otherFieldName = generateFieldName(otherFieldDesc);
-        return `
-          message.${otherFieldName} = null;`;
-    }}).join("");
-*/
 }
 
 export function generateFieldDecodeInstruction(
