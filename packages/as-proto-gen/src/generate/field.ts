@@ -150,13 +150,13 @@ export function generateFieldDecodeInstruction(
   const isPacked = fieldDescriptor.getOptions()?.hasPacked();
   const isOneOf = fieldDescriptor.hasOneofIndex();
 
-  if (isOneOf) {
-    return generateOneOfFieldDecodeInstruction(
-      messageDescriptor,
-      fieldDescriptor,
-      scopeContext
-    )
-  }
+//  if (isOneOf) {
+//    return generateOneOfFieldDecodeInstruction(
+//      messageDescriptor,
+//      fieldDescriptor,
+//      scopeContext
+//    )
+//  }
 
   const fieldNumber = fieldDescriptor.getNumber();
   assert.ok(fieldNumber !== undefined);
