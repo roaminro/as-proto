@@ -102,23 +102,22 @@ function nullOtherOneOfFields(
   fieldDescriptor: FieldDescriptorProto
 ) : string {
   return `
-          ${messageDescriptor
-            .getFieldList()
-            .filter(
-              (otherFieldDescriptor) => 
-                otherFieldDescriptor.hasOneofIndex()
-                && otherFieldDescriptor.getOneofIndex() == fieldDescriptor.getOneofIndex()
-                && otherFieldDescriptor.getNumber() != fieldDescriptor.getNumber()
-            )
-            .map(
-              (otherFieldDescriptor) =>
-              {
-                const otherFieldName = generateFieldName(otherFieldDescriptor);
-                return `
-                  message.${otherFieldName} = null;`
-              }
-            )
-            .join("\n")}
+    ${messageDescriptor
+      .getFieldList()
+      .filter(
+        (otherFieldDescriptor) => 
+          otherFieldDescriptor.hasOneofIndex()
+          && otherFieldDescriptor.getOneofIndex() == fieldDescriptor.getOneofIndex()
+          && otherFieldDescriptor.getNumber() != fieldDescriptor.getNumber()
+      )
+      .map(
+        (otherFieldDescriptor) =>
+        {
+          const otherFieldName = generateFieldName(otherFieldDescriptor);
+          return `message.${otherFieldName} = null;`
+        }
+      )
+      .join("\n")}
   `;
 }
 
@@ -138,23 +137,23 @@ function generateOneOfFieldDecodeInstruction(
   if (isMessage) {
     const Message = generateRef(fieldDescriptor, fileContext);
     return `
-        case ${fieldNumber}:
-          message.${fieldName} = ${Message}.decode(reader, reader.uint32());
-          ${nullOtherOneOfFields(
-            messageDescriptor,
-            fieldDescriptor
-          )}
-          break;
+      case ${fieldNumber}:
+        message.${fieldName} = ${Message}.decode(reader, reader.uint32());
+        ${nullOtherOneOfFields(
+          messageDescriptor,
+          fieldDescriptor
+        )}
+        break;
     `;
   } else {
     return `
-        case ${fieldNumber}:
-          message.${fieldName} = reader.${fieldTypeInstruction}();
-          ${nullOtherOneOfFields(
-            messageDescriptor,
-            fieldDescriptor
-          )}
-          break;
+      case ${fieldNumber}:
+        message.${fieldName} = reader.${fieldTypeInstruction}();
+        ${nullOtherOneOfFields(
+          messageDescriptor,
+          fieldDescriptor
+        )}
+        break;
     `;
   }
 }
