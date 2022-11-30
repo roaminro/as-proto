@@ -1,6 +1,6 @@
 {
   "name": "@koinos/as-proto-gen",
-  "version": "1.0.3-7",
+  "version": "1.0.3",
   "license": "MIT",
   "main": "lib/index.js",
   "author": "Koinos Group <contact@koinos.group>",
