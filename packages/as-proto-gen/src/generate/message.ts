@@ -133,6 +133,7 @@ function generateDecodeMethod(
             .map(
               (fieldDescriptor) =>
                 `${generateFieldDecodeInstruction(
+                  messageDescriptor,
                   fieldDescriptor,
                   scopeContext
                 )}`

@@ -1,4 +1,4 @@
-import { FieldDescriptorProto } from "google-protobuf/google/protobuf/descriptor_pb";
+import { DescriptorProto, FieldDescriptorProto } from "google-protobuf/google/protobuf/descriptor_pb";
 import * as assert from "assert";
 
 import { generateRef } from "./ref";
@@ -97,7 +97,69 @@ export function generateFieldEncodeInstruction(
   }
 }
 
+function nullOtherOneOfFields(
+  messageDescriptor: DescriptorProto,
+  fieldDescriptor: FieldDescriptorProto
+) : string {
+  return `
+    ${messageDescriptor
+      .getFieldList()
+      .filter(
+        (otherFieldDescriptor) => 
+          otherFieldDescriptor.hasOneofIndex()
+          && otherFieldDescriptor.getOneofIndex() == fieldDescriptor.getOneofIndex()
+          && otherFieldDescriptor.getNumber() != fieldDescriptor.getNumber()
+      )
+      .map(
+        (otherFieldDescriptor) =>
+        {
+          const otherFieldName = generateFieldName(otherFieldDescriptor);
+          return `message.${otherFieldName} = null;`
+        }
+      )
+      .join("\n")}
+  `;
+}
+
+function generateOneOfFieldDecodeInstruction(
+  messageDescriptor: DescriptorProto,
+  fieldDescriptor: FieldDescriptorProto,
+  scopeContext: ScopeContext
+): string {
+  const fileContext = scopeContext.getFileContext();
+  const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
+
+  const fieldNumber = fieldDescriptor.getNumber();
+  assert.ok(fieldNumber !== undefined);
+  const fieldName = generateFieldName(fieldDescriptor);
+  const fieldTypeInstruction = generateFieldTypeInstruction(fieldDescriptor);
+
+  if (isMessage) {
+    const Message = generateRef(fieldDescriptor, fileContext);
+    return `
+      case ${fieldNumber}:
+        message.${fieldName} = ${Message}.decode(reader, reader.uint32());
+        ${nullOtherOneOfFields(
+          messageDescriptor,
+          fieldDescriptor
+        )}
+        break;
+    `;
+  } else {
+    return `
+      case ${fieldNumber}:
+        message.${fieldName} = reader.${fieldTypeInstruction}();
+        ${nullOtherOneOfFields(
+          messageDescriptor,
+          fieldDescriptor
+        )}
+        break;
+    `;
+  }
+}
+
 export function generateFieldDecodeInstruction(
+  messageDescriptor: DescriptorProto,
   fieldDescriptor: FieldDescriptorProto,
   scopeContext: ScopeContext
 ): string {
@@ -105,6 +167,15 @@ export function generateFieldDecodeInstruction(
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
   const isMessage = fieldDescriptor.getType() === Type.TYPE_MESSAGE;
   const isPacked = fieldDescriptor.getOptions()?.hasPacked();
+  const isOneOf = fieldDescriptor.hasOneofIndex();
+
+  if (isOneOf) {
+    return generateOneOfFieldDecodeInstruction(
+      messageDescriptor,
+      fieldDescriptor,
+      scopeContext
+    )
+  }
 
   const fieldNumber = fieldDescriptor.getNumber();
   assert.ok(fieldNumber !== undefined);
@@ -273,10 +344,13 @@ export function generateFieldDefaultValue(
   fieldDescriptor: FieldDescriptorProto
 ): string {
   const isRepeated = fieldDescriptor.getLabel() === Label.LABEL_REPEATED;
+  const isOneOf = fieldDescriptor.hasOneofIndex();
   const defaultValue = fieldDescriptor.getDefaultValue();
 
   if (isRepeated) {
     return "[]";
+  } else if (isOneOf) {
+    return "null";
   } else if (defaultValue) {
     return defaultValue;
   } else {
