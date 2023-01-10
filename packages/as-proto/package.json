@@ -1,11 +1,12 @@
 {
   "name": "@koinos/as-proto",
-  "version": "1.0.0",
-  "main": "assembly/index.ts",
-  "types": "assembly/index.ts",
+  "version": "1.0.1",
+  "main": "index.ts",
+  "types": "index.ts",
   "license": "MIT",
   "author": "Koinos Group <contact@koinos.group>",
   "repository": "https://github.com/koinos/as-proto.git",
+  "type": "module",
   "tags": [
     "assemblyscript",
     "protobuf",
@@ -15,10 +16,11 @@
     "fast"
   ],
   "files": [
-    "assembly"
+    "assembly",
+    "index.ts"
   ],
   "devDependencies": {
-    "@as-pect/cli": "^6.2.4"
+    "@as-pect/cli": "^8.0.1"
   },
   "scripts": {
     "test": "asp --verbose",

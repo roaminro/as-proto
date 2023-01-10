@@ -21,7 +21,7 @@ export class FixedWriter extends Writer {
   /**
    * Fixed buffer.
    */
-  private buf: Uint8Array;
+  private buf: Uint8Array = new Uint8Array(0);
 
   /**
    * Index in varlen array from sizer.
