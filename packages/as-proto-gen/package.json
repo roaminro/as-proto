@@ -1,10 +1,11 @@
 {
-  "name": "@koinos/as-proto-gen",
-  "version": "1.0.3",
+  "name": "@roamin/as-proto-gen",
+  "version": "1.0.4",
   "license": "MIT",
   "main": "lib/index.js",
-  "author": "Koinos Group <contact@koinos.group>",
-  "repository": "https://github.com/koinos/as-proto.git",
+  "author": "Piotr Oleś <piotrek.oles@gmail.com>",
+  "contributors": ["Roamin Ro", "Koinos Group <contact@koinos.group>"],
+  "repository": "https://github.com/roaminro/as-proto.git",
   "tags": [
     "assemblyscript",
     "protobuf",

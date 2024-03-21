@@ -1,11 +1,12 @@
 {
-  "name": "@koinos/as-proto",
-  "version": "1.0.1",
+  "name": "@roamin/as-proto",
+  "version": "1.0.2",
   "main": "index.ts",
   "types": "index.ts",
   "license": "MIT",
-  "author": "Koinos Group <contact@koinos.group>",
-  "repository": "https://github.com/koinos/as-proto.git",
+  "author": "Piotr Oleś <piotrek.oles@gmail.com>",
+  "contributors": ["Roamin Ro", "Koinos Group <contact@koinos.group>"],
+  "repository": "https://github.com/roaminro/as-proto.git",
   "type": "module",
   "tags": [
     "assemblyscript",
